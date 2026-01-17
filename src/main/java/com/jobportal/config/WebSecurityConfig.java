@@ -4,30 +4,33 @@ import com.jobportal.services.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class WebSecurityConfig {
-   private final CustomUserDetailsService  customUserDetailsService;
-   private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
+    @Autowired
+    public WebSecurityConfig(CustomUserDetailsService customUserDetailsService,
+            CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
+        this.customUserDetailsService = customUserDetailsService;
+        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
+    }
 
-   @Autowired
-   public WebSecurityConfig(CustomUserDetailsService customUserDetailsService,CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
-       this.customUserDetailsService = customUserDetailsService;
-       this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
-   }
-
-    private  final  String[] publicUrl = {"/",
+    private final String[] publicUrl = { "/",
             "/global-search/**",
             "/register",
             "/register/**",
+            "/api/auth/**",
             "/webjars/**",
             "/resources/**",
             "/assets/**",
@@ -39,6 +42,7 @@ public class WebSecurityConfig {
             "/*.js.map",
             "/fonts**", "/favicon.ico", "/resources/**", "/error"
     };
+
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
@@ -50,20 +54,20 @@ public class WebSecurityConfig {
             auth.anyRequest().authenticated();
         });
 
-        http.formLogin(form->form.loginPage("/login").permitAll()
-                        .successHandler(customAuthenticationSuccessHandler))
-                .logout(logout-> {
+        http.formLogin(form -> form.loginPage("/login").permitAll()
+                .successHandler(customAuthenticationSuccessHandler))
+                .logout(logout -> {
                     logout.logoutUrl("/logout");
                     logout.logoutSuccessUrl("/");
                 }).cors(Customizer.withDefaults())
-                .csrf(csrf->csrf.disable());
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
 
     @Bean
-    protected AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider =  new DaoAuthenticationProvider();
+    protected AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         authenticationProvider.setUserDetailsService(customUserDetailsService);
 
@@ -71,8 +75,14 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    protected PasswordEncoder passwordEncoder(){
+    protected PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
 }

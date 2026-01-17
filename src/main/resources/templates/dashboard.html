@@ -210,7 +210,7 @@
 					<a th:href="@{/job-details-apply/{id}(id=${jobPost.jobPostId})}"
 						style="text-decoration: none; color: black">
 						<div
-							onclick="window.location=/job-details-apply/{id}(id=${jobPost.jobPostId})"
+							onclick="window.location=@{/job-details-apply/{id}(id=${jobPost.jobPostId})}"
 							class="job-row">
 							<div class="row">
 								<div class="col-md-4">
@@ -232,8 +232,8 @@
 										City State</label>
 								</div>
 								<div class="col-md-4 text-right">
-									<label th:text="@{${jobPost.jobCompanyId.name}}">Recruiter
-										Company Name</label>
+									<label th:text="${jobPost.jobCompanyId.name}">Recruiter Company Name</label>
+
 								</div>
 							</div>
 						</div>

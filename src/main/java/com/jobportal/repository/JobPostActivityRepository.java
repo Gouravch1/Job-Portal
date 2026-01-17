@@ -35,7 +35,7 @@ public interface JobPostActivityRepository extends JpaRepository<JobPostActivity
                                             @Param("type") List<String> type);
 
     @Query(value = "SELECT * FROM job_post_activity j INNER JOIN job_location l on j.job_location_id=l.id  WHERE j" +
-            ".job_title LIKE %:job%"
+            ".job_title LIKE % :job%"
             + " AND (l.city LIKE %:location%"
             + " OR l.country LIKE %:location%"
             + " OR l.state LIKE %:location%) " +
